@@ -11,12 +11,12 @@
   <div class="app">
 
     <nav class="navbar">
-      <a class="navbar__link active" href="/home">Inicio</a>
+      <a class="navbar__link" href="/">Inicio</a>
       <a class="navbar__link" href="/chat">Chat</a>
       <a class="navbar__link" href="/about">Acerca</a>
     </nav>
 
-    <div id="view-home" class="view view--active">
+    <div id="view-home" class="view">
       <div class="home">
         <h1 class="home__title">DBZ Chat</h1>
         <p class="home__subtitle">Elegí tu personaje y comenzá a chatear</p>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <div id="view-chat" class="view ">
+    <div id="view-chat" class="view">
       <header class="chatHeader">
         <div class="chatHeader__info">
           <img class="chatHeader__avatar" src="https://dragonball-api.com/characters/goku_normal.webp" alt="Goku" />
@@ -65,11 +65,27 @@
     <div id="view-about" class="view">
       <div class="about">
         <h1 class="about__title">Acerca del proyecto</h1>
-        <p class="about__text">DBZ Chat es una Single Page Application donde podés chatear con personajes del universo Dragon Ball Z.</p>        
+        <p class="about__text">DBZ Chat es una Single Page Application donde podés chatear con personajes del universo Dragon Ball Z.</p>
+      </div>
+    </div>
+
+    <div id="view-404" class="view">
+      <div class="not-found">
+        <p class="stateEmoji">🔍</p>
+        <h1>404</h1>
+        <p>Esta página no existe.</p>
+        <a href="/" class="not-found__link">Volver al inicio</a>
       </div>
     </div>
 
   </div>
+
+  <div class="route-bar">
+    <span class="route-bar__label">ruta:</span>
+    <span id="route-display" class="route-bar__path">/</span>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
 
 </body>
 </html>

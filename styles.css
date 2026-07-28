@@ -349,6 +349,71 @@ body {
   font-weight: 700;
 }
 
+/* ── VISTA: 404 ── */
+
+.not-found {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.not-found h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.not-found p {
+  color: var(--color-text-muted);
+}
+
+.not-found__link {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.not-found__link:hover {
+  background: var(--color-primary-dk);
+}
+
+/* ── ROUTE BAR ── */
+
+.route-bar {
+  position: fixed;
+  bottom: var(--space-sm);
+  right: var(--space-md);
+  height: 24px;
+  background: #020617cc;
+  border: 1px solid var(--color-border);
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-sm);
+  font-size: 0.75rem;
+  font-family: monospace;
+  z-index: 100;
+}
+
+.route-bar__label {
+  color: var(--color-text-muted);
+}
+
+.route-bar__path {
+  color: var(--color-primary);
+}
+
 /* ── TABLET (768px+) ── */
 
 @media (min-width: 768px) {
@@ -422,7 +487,8 @@ body {
   }
 
   .app {
-    max-width: 42rem;
+    width: 90%;
+    max-width: 120rem;
     height: 90dvh;
     border-radius: 1rem;
     border: 1px solid var(--color-border);
