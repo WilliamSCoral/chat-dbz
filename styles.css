@@ -108,40 +108,62 @@ body {
 }
 
 .characters {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-md);
   width: 100%;
-  max-width: 20rem;
+  max-width: 32rem;
+  align-items: start;
+}
+
+.character-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  position: relative;
+  width: 100%;
+  min-width: 0;
 }
 
 .character-card {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-md);
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 3 / 4;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .character-card:hover {
   border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
 }
 
 .character-card__avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--color-primary);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  transition: transform 0.3s ease;
+}
+
+.character-card:hover .character-card__avatar {
+  transform: scale(1.06);
+  transform-origin: bottom center;
 }
 
 .character-card__name {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-text);
 }
 
 /* ── VISTA: CHAT ── */
@@ -167,6 +189,7 @@ body {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: top;
   border: 2px solid var(--color-primary);
 }
 
@@ -383,6 +406,29 @@ body {
   transition: background 0.2s;
 }
 
+.message--loading {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-text-muted);
+  border-radius: 50%;
+  animation: typing 1.2s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30%           { opacity: 1;   transform: translateY(-4px); }
+}
+
 .not-found__link:hover {
   background: var(--color-primary-dk);
 }
@@ -431,15 +477,9 @@ body {
   }
 
   .characters {
-    flex-direction: row;
+    grid-template-columns: repeat(3, 1fr);
     max-width: 100%;
-    justify-content: center;
-  }
-
-  .character-card {
-    flex-direction: column;
-    text-align: center;
-    width: 10rem;
+    padding-bottom: var(--space-xl);
   }
 
   .chatHeader {
@@ -498,6 +538,29 @@ body {
 
   .navbar {
     border-radius: 1rem 1rem 0 0;
+  }
+
+  .characters {
+    grid-template-columns: repeat(6, 1fr);
+    max-width: 100%;
+    padding-bottom: var(--space-xl);
+  }
+
+  .character-card {
+    overflow: visible;
+  }
+
+  .character-card-wrapper {
+    z-index: 0;
+  }
+
+  .character-card-wrapper:hover {
+    z-index: 10;
+  }
+
+  .character-card:hover .character-card__avatar {
+    transform: scale(1.18);
+    transform-origin: bottom center;
   }
 
   .chatHeader {

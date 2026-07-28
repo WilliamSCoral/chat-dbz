@@ -6,7 +6,7 @@ import { renderNotFound } from './views/notFound.js';
 const routes = {
   '/': renderHome,
   '/chat': renderChat,
-  '/about': renderAbout,
+  '/acerca-del-proyecto': renderAbout,
 };
 
 export function router() {
