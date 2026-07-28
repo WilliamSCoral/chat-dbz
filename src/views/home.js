@@ -1,5 +1,5 @@
-import { showView } from '../utils.js';
-import { getCharacters } from '../api.js';
+import { showView, getUserMessage } from '../utils.js';
+import { getCharacters } from '../services/dbzApi.js';
 import { navigateTo } from '../router.js';
 
 export async function renderHome() {
@@ -42,7 +42,7 @@ export async function renderHome() {
         <div class="stateContent">
           <p class="stateEmoji">⚠️</p>
           <h2>No se pudieron cargar los personajes</h2>
-          <p>${error.message}</p>
+          <p>${getUserMessage(error)}</p>
           <button class="stateRetry" id="retry-home">Reintentar</button>
         </div>
       </div>
