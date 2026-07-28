@@ -8,41 +8,66 @@
 </head>
 <body>
 
-  <div class="chatApp">
+  <div class="app">
 
-    <header class="chatHeader">
-      <div class="chatHeader__info">
-        <img
-          class="chatHeader__avatar"
-          src="https://dragonball-api.com/characters/goku_normal.webp"
-          alt="Goku"
-        />
-        <div>
-          <h1 class="chatHeader__name">Goku</h1>
-          <p class="chatHeader__status">En línea</p>
+    <nav class="navbar">
+      <a class="navbar__link active" href="/home">Inicio</a>
+      <a class="navbar__link" href="/chat">Chat</a>
+      <a class="navbar__link" href="/about">Acerca</a>
+    </nav>
+
+    <div id="view-home" class="view view--active">
+      <div class="home">
+        <h1 class="home__title">DBZ Chat</h1>
+        <p class="home__subtitle">Elegí tu personaje y comenzá a chatear</p>
+        <div class="characters">
+          <div class="character-card">
+            <img class="character-card__avatar" src="https://dragonball-api.com/characters/goku_normal.webp" alt="Goku" />
+            <span class="character-card__name">Goku</span>
+          </div>
+          <div class="character-card">
+            <img class="character-card__avatar" src="https://dragonball-api.com/characters/vegeta_normal.webp" alt="Vegeta" />
+            <span class="character-card__name">Vegeta</span>
+          </div>
+          <div class="character-card">
+            <img class="character-card__avatar" src="https://dragonball-api.com/characters/frieza_normal.webp" alt="Freezer" />
+            <span class="character-card__name">Freezer</span>
+          </div>
         </div>
       </div>
-    </header>
+    </div>
 
-    <main class="chatMessages" aria-label="Mensajes del chat">
-      <div class="state state--empty">
-        <div class="stateContent">
-          <p class="stateEmoji">💬</p>
-          <h2>¡Iniciá la conversación!</h2>
-          <p>Escribí un mensaje para hablar con Goku.</p>
+    <div id="view-chat" class="view ">
+      <header class="chatHeader">
+        <div class="chatHeader__info">
+          <img class="chatHeader__avatar" src="https://dragonball-api.com/characters/goku_normal.webp" alt="Goku" />
+          <div>
+            <h2 class="chatHeader__name">Goku</h2>
+            <p class="chatHeader__status">En línea</p>
+          </div>
         </div>
-      </div>
-    </main>
+      </header>
+      <main class="chatMessages" aria-label="Mensajes del chat">
+        <div class="state state--empty">
+          <div class="stateContent">
+            <p class="stateEmoji">💬</p>
+            <h2>¡Iniciá la conversación!</h2>
+            <p>Escribí un mensaje para hablar con Goku.</p>
+          </div>
+        </div>
+      </main>
+      <form class="chatComposer" autocomplete="off">
+        <input class="chatInput" type="text" placeholder="Escribí un mensaje..." aria-label="Escribe tu mensaje" />
+        <button class="chatSend" type="submit" aria-label="Enviar">➤</button>
+      </form>
+    </div>
 
-    <form class="chatComposer" autocomplete="off">
-      <input
-        class="chatInput"
-        type="text"
-        placeholder="Escribí un mensaje..."
-        aria-label="Escribe tu mensaje"
-      />
-      <button class="chatSend" type="submit" aria-label="Enviar">➤</button>
-    </form>
+    <div id="view-about" class="view">
+      <div class="about">
+        <h1 class="about__title">Acerca del proyecto</h1>
+        <p class="about__text">DBZ Chat es una Single Page Application donde podés chatear con personajes del universo Dragon Ball Z.</p>        
+      </div>
+    </div>
 
   </div>
 
