@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DBZ Chat</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <div class="chatApp">
+
+    <header class="chatHeader">
+      <div class="chatHeader__info">
+        <img
+          class="chatHeader__avatar"
+          src="https://dragonball-api.com/characters/goku_normal.webp"
+          alt="Goku"
+        />
+        <div>
+          <h1 class="chatHeader__name">Goku</h1>
+          <p class="chatHeader__status">En línea</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="chatMessages" aria-label="Mensajes del chat">
+      <div class="state state--empty">
+        <div class="stateContent">
+          <p class="stateEmoji">💬</p>
+          <h2>¡Iniciá la conversación!</h2>
+          <p>Escribí un mensaje para hablar con Goku.</p>
+        </div>
+      </div>
+    </main>
+
+    <form class="chatComposer" autocomplete="off">
+      <input
+        class="chatInput"
+        type="text"
+        placeholder="Escribí un mensaje..."
+        aria-label="Escribe tu mensaje"
+      />
+      <button class="chatSend" type="submit" aria-label="Enviar">➤</button>
+    </form>
+
+  </div>
+
+</body>
+</html>
