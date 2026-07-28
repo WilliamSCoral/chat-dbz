@@ -1,22 +1,28 @@
+import { toCharacterProfile } from './transform/character.js';
+
 const DBZ_API = 'https://dragonball-api.com/api';
 
 const SELECTED = ['Goku', 'Vegeta', 'Gohan', 'Freezer', 'Bulma', 'Majin'];
 
+function buildCharactersUrl({ limit = 58 } = {}) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  return `${DBZ_API}/characters?${params.toString()}`;
+}
+
 export async function fetchJson(url, options = {}) {
   const response = await fetch(url, options);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
 }
 
 export async function getCharacters() {
-  const data = await fetchJson(`${DBZ_API}/characters?limit=58`);
+  const url = buildCharactersUrl({ limit: 58 });
+  const data = await fetchJson(url);
 
   const result = [];
   for (const name of SELECTED) {
-    const match = data.items.find(c => c.name.includes(name));
-    if (match) result.push(match);
+    const raw = data.items.find(c => c.name.includes(name));
+    if (raw) result.push(toCharacterProfile(raw));
   }
   return result;
 }
