@@ -1,0 +1,11 @@
+{
+  "name": "chat-dbz",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0"
+  }
+}
