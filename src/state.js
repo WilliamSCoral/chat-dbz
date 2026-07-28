@@ -1,6 +1,7 @@
 let state = {
   status: 'idle',
   messages: [],
+  history: [],
   character: null,
   error: null,
 };
