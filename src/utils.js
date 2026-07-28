@@ -1,5 +1,6 @@
 export function getUserMessage(error) {
   if (error.code === 'NO_RESULTS') return 'No se encontraron personajes.';
+  if (error.status === 429) return `Demasiados mensajes. Esperá ${error.retryAfterSeconds ?? 5} segundos.`;
   if (error.message?.includes('HTTP 404')) return 'Recurso no encontrado (404).';
   if (error.message?.includes('HTTP 5')) return 'Error en el servidor. Intentá de nuevo.';
   if (error.name === 'TypeError') return 'Sin conexión a internet.';

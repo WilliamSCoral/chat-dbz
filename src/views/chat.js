@@ -1,5 +1,20 @@
-import { showView } from '../utils.js';
+import { showView, getUserMessage } from '../utils.js';
 import { getState, setState } from '../state.js';
+import { createSystemPrompt, buildPayload, normalizeAIResponse } from '../services/aiService.js';
+import { appendUserMessage, appendAssistantMessage, getTrimmedHistory, resetHistory } from '../chat/history.js';
+import { mockFetch } from '../chat/mockFetch.js';
+
+function debounce(fn, delay) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export function renderChat() {
   showView('view-chat', '/chat');
@@ -10,50 +25,82 @@ export function renderChat() {
     document.querySelector('.chatHeader__avatar').src = character.image;
     document.querySelector('.chatHeader__avatar').alt = character.name;
     document.querySelector('.chatHeader__name').textContent = character.name;
-    document.querySelector('.chatMessages .state p:last-child').textContent =
-      `Escribí un mensaje para hablar con ${character.name}.`;
+    document.querySelector('.chatHeader__status').textContent = 'En línea';
   }
 
-  setState({ status: 'idle', messages: [], character, error: null });
+  setState({ status: 'idle', messages: [], history: resetHistory(), character, error: null });
+  renderMessages();
 
   const form = document.querySelector('.chatComposer');
   const newForm = form.cloneNode(true);
   form.replaceWith(newForm);
-  newForm.addEventListener('submit', handleSubmit);
+  const debouncedSubmit = debounce(handleSubmit, 300);
+  newForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    debouncedSubmit(e);
+  });
 }
 
 async function handleSubmit(e) {
-  e.preventDefault();
+  if (e?.preventDefault) e.preventDefault();
+
+  const { status, messages, history, character } = getState();
+  if (status === 'loading') return;
 
   const input = document.querySelector('.chatInput');
+  const sendBtn = document.querySelector('.chatSend');
   const text = input.value.trim();
   if (!text) return;
 
   input.value = '';
+  sendBtn.disabled = true;
 
-  const { messages, character } = getState();
-  const userMsg = { role: 'user', content: text };
-  const updatedMessages = [...messages, userMsg];
+  const systemPrompt = createSystemPrompt(character);
+  const newHistory = appendUserMessage(history, text);
+  const uiMessages = [...messages, { role: 'user', content: text }];
 
-  setState({ status: 'loading', messages: updatedMessages });
+  setState({ status: 'loading', messages: uiMessages, history: newHistory });
   renderMessages();
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    const raw = await callAI(newHistory, systemPrompt);
+    const responseText = normalizeAIResponse(raw);
+    const updatedHistory = appendAssistantMessage(newHistory, responseText);
+    const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
 
-    const characterName = character?.name || 'el personaje';
-    const botMsg = {
-      role: 'character',
-      content: `[${characterName}]: La conexión con la IA se configura en el próximo módulo.`,
-    };
-
-    setState({ status: 'success', messages: [...updatedMessages, botMsg] });
-    renderMessages();
+    setState({ status: 'success', messages: updatedMessages, history: updatedHistory });
 
   } catch (error) {
-    setState({ status: 'error', error: error.message });
+    if (error.status === 429) {
+      const seconds = error.retryAfterSeconds ?? 5;
+      setState({ status: 'loading', error: `Límite alcanzado. Reintentando en ${seconds}s...` });
+      renderMessages();
+      await wait(seconds * 1000);
+
+      try {
+        const raw = await callAI(newHistory, systemPrompt);
+        const responseText = normalizeAIResponse(raw);
+        const updatedHistory = appendAssistantMessage(newHistory, responseText);
+        const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
+        setState({ status: 'success', messages: updatedMessages, history: updatedHistory });
+      } catch (retryError) {
+        setState({ status: 'error', error: getUserMessage(retryError) });
+      }
+    } else {
+      setState({ status: 'error', error: getUserMessage(error) });
+    }
+  } finally {
+    sendBtn.disabled = false;
     renderMessages();
+    const container = document.querySelector('.chatMessages');
+    if (container) container.scrollTop = container.scrollHeight;
   }
+}
+
+async function callAI(history, systemPrompt) {
+  const trimmed = getTrimmedHistory(history);
+  const payload = buildPayload(trimmed, systemPrompt);
+  return mockFetch(payload);
 }
 
 function renderMessages() {
@@ -90,21 +137,12 @@ function renderMessages() {
   const errorHTML = status === 'error' ? `
     <div class="state state--error">
       <div class="stateContent">
-        <p>Error: ${error}</p>
-        <button class="stateRetry" id="retry-msg">Reintentar</button>
+        <p class="stateEmoji">⚠️</p>
+        <p>${error}</p>
       </div>
     </div>
   ` : '';
 
   container.innerHTML = messagesHTML + loadingHTML + errorHTML;
-
-  if (status === 'error') {
-    document.getElementById('retry-msg')?.addEventListener('click', () => {
-      const { messages: currentMsgs } = getState();
-      const lastUser = [...currentMsgs].reverse().find(m => m.role === 'user');
-      if (lastUser) handleSubmit({ preventDefault: () => {} });
-    });
-  }
-
   container.scrollTop = container.scrollHeight;
 }
