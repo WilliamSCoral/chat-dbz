@@ -2,7 +2,7 @@ import { showView, getUserMessage } from '../utils.js';
 import { getState, setState } from '../state.js';
 import { createSystemPrompt, buildPayload, normalizeAIResponse } from '../services/aiService.js';
 import { appendUserMessage, appendAssistantMessage, getTrimmedHistory, resetHistory } from '../chat/history.js';
-import { mockFetch } from '../chat/mockFetch.js';
+import { apiFetch } from '../chat/apiFetch.js';
 
 function debounce(fn, delay) {
   let timer = null;
@@ -28,7 +28,12 @@ export function renderChat() {
     document.querySelector('.chatHeader__status').textContent = 'En línea';
   }
 
-  setState({ status: 'idle', messages: [], history: resetHistory(), character, error: null });
+  const { characterHistories } = getState();
+  const saved = character && characterHistories[character.id];
+  const restoredMessages = saved ? saved.messages : [];
+  const restoredHistory = saved ? saved.history : resetHistory();
+
+  setState({ status: 'idle', messages: restoredMessages, history: restoredHistory, character, error: null });
   renderMessages();
 
   const form = document.querySelector('.chatComposer');
@@ -68,7 +73,16 @@ async function handleSubmit(e) {
     const updatedHistory = appendAssistantMessage(newHistory, responseText);
     const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
 
-    setState({ status: 'success', messages: updatedMessages, history: updatedHistory });
+    const { characterHistories } = getState();
+    setState({
+      status: 'success',
+      messages: updatedMessages,
+      history: updatedHistory,
+      characterHistories: {
+        ...characterHistories,
+        [character.id]: { messages: updatedMessages, history: updatedHistory },
+      },
+    });
 
   } catch (error) {
     if (error.status === 429) {
@@ -82,7 +96,16 @@ async function handleSubmit(e) {
         const responseText = normalizeAIResponse(raw);
         const updatedHistory = appendAssistantMessage(newHistory, responseText);
         const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
-        setState({ status: 'success', messages: updatedMessages, history: updatedHistory });
+        const { characterHistories } = getState();
+        setState({
+          status: 'success',
+          messages: updatedMessages,
+          history: updatedHistory,
+          characterHistories: {
+            ...characterHistories,
+            [character.id]: { messages: updatedMessages, history: updatedHistory },
+          },
+        });
       } catch (retryError) {
         setState({ status: 'error', error: getUserMessage(retryError) });
       }
@@ -100,7 +123,7 @@ async function handleSubmit(e) {
 async function callAI(history, systemPrompt) {
   const trimmed = getTrimmedHistory(history);
   const payload = buildPayload(trimmed, systemPrompt);
-  return mockFetch(payload);
+  return apiFetch(payload);
 }
 
 function renderMessages() {

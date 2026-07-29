@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "npx serve ."
   },
-  "dependencies": {
-    "@google/generative-ai": "^0.24.0"
-  }
+  "dependencies": {}
 }

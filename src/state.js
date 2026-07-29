@@ -4,6 +4,7 @@ let state = {
   history: [],
   character: null,
   error: null,
+  characterHistories: {},
 };
 
 export function getState() {
