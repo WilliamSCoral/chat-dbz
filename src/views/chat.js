@@ -130,7 +130,7 @@ function renderMessages() {
   const { status, messages, error } = getState();
   const container = document.querySelector('.chatMessages');
 
-  if (status === 'idle' || messages.length === 0) {
+  if (status === 'idle' && messages.length === 0) {
     container.innerHTML = `
       <div class="state state--empty">
         <div class="stateContent">

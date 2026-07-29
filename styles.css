@@ -93,6 +93,7 @@ body {
   padding: var(--space-xl) var(--space-md);
   gap: var(--space-lg);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .home__title {
