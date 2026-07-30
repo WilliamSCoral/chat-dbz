@@ -9,12 +9,12 @@ describe('getUserMessage', () => {
 
   it('debería retornar mensaje de rate limit cuando el error tiene status 429', () => {
     const error = { status: 429, retryAfterSeconds: 10 };
-    expect(getUserMessage(error)).toBe('Demasiados mensajes. Esperá 10 segundos.');
+    expect(getUserMessage(error)).toBe('Demasiados mensajes. Espera 10 segundos.');
   });
 
   it('debería usar el valor por defecto de 5 segundos si retryAfterSeconds no está definido', () => {
     const error = { status: 429 };
-    expect(getUserMessage(error)).toBe('Demasiados mensajes. Esperá 5 segundos.');
+    expect(getUserMessage(error)).toBe('Demasiados mensajes. Espera 5 segundos.');
   });
 
   it('debería retornar mensaje 404 cuando el mensaje de error incluye HTTP 404', () => {
@@ -24,7 +24,7 @@ describe('getUserMessage', () => {
 
   it('debería retornar mensaje de servidor cuando el mensaje de error incluye HTTP 5xx', () => {
     const error = { message: 'HTTP 500 internal server error' };
-    expect(getUserMessage(error)).toBe('Error en el servidor. Intentá de nuevo.');
+    expect(getUserMessage(error)).toBe('Error en el servidor. Intenta de nuevo.');
   });
 
   it('debería retornar mensaje de sin conexión cuando el error es TypeError', () => {

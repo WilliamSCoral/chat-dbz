@@ -5,15 +5,20 @@
 }
 
 :root {
-  --color-primary:    #f97316;
-  --color-primary-dk: #c2410c;
-  --color-bg:         #0f172a;
-  --color-surface:    #1e293b;
-  --color-border:     #334155;
-  --color-text:       #f1f5f9;
-  --color-text-muted: #94a3b8;
-  --color-user-msg:   #f97316;
-  --color-char-msg:   #1e293b;
+  --color-primary:      #f97316;
+  --color-primary-dk:   #c2410c;
+  --color-bg:           #0f172a;
+  --color-surface:      #1e293b;
+  --color-border:       #334155;
+  --color-text:         #f1f5f9;
+  --color-text-muted:   #94a3b8;
+  --color-user-msg:     #f97316;
+  --color-char-msg:     #1e293b;
+  --color-outer-bg:     #020617;
+  --color-error:        #f87171;
+  --color-error-bg:     rgba(185, 28, 28, 0.1);
+  --color-online:       #4ade80;
+  --color-route-bar-bg: #020617cc;
   --font-size-base:   1rem;
   --font-size-sm:     0.875rem;
   --font-size-lg:     1.125rem;
@@ -27,14 +32,18 @@
 }
 
 /* ── TEMA CLARO ── */
-/* Cuando el <html> tiene data-theme="light", estas variables sobreescriben las del :root */
 [data-theme="light"] {
-  --color-bg:         #f8fafc;
-  --color-surface:    #ffffff;
-  --color-border:     #e2e8f0;
-  --color-text:       #0f172a;
-  --color-text-muted: #64748b;
-  --color-char-msg:   #f1f5f9;
+  --color-bg:           #f8fafc;
+  --color-surface:      #ffffff;
+  --color-border:       #e2e8f0;
+  --color-text:         #0f172a;
+  --color-text-muted:   #64748b;
+  --color-char-msg:     #f1f5f9;
+  --color-outer-bg:     #cbd5e1;
+  --color-error:        #dc2626;
+  --color-error-bg:     rgba(220, 38, 38, 0.08);
+  --color-route-bar-bg: #e2e8f0cc;
+  --color-online:       #f97316;
 }
 
 body {
@@ -237,7 +246,7 @@ body {
 
 .chatHeader__status {
   font-size: var(--font-size-sm);
-  color: #4ade80;
+  color: var(--color-online);
 }
 
 .chatMessages {
@@ -273,6 +282,19 @@ body {
   border-bottom-left-radius: var(--space-xs);
 }
 
+.message__content {
+  display: block;
+  white-space: pre-wrap;
+}
+
+.message__time {
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 0.25rem;
+  opacity: 0.65;
+  text-align: right;
+}
+
 .state {
   flex: 1;
   display: grid;
@@ -302,16 +324,16 @@ body {
 
 .state--empty h2   { color: var(--color-text); }
 .state--loading h2 { color: var(--color-text-muted); }
-.state--error      { background: rgba(185, 28, 28, 0.1); }
-.state--error h2   { color: #f87171; }
+.state--error      { background: var(--color-error-bg); }
+.state--error h2   { color: var(--color-error); }
 
 .stateRetry {
   margin-top: var(--space-md);
   padding: 0.6rem 1.2rem;
   background: transparent;
-  border: 1px solid #f87171;
+  border: 1px solid var(--color-error);
   border-radius: 0.75rem;
-  color: #f87171;
+  color: var(--color-error);
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
@@ -330,13 +352,18 @@ body {
 .chatInput {
   flex: 1;
   min-height: 44px;
-  padding: var(--space-sm) var(--space-md);
+  max-height: 120px;
+  padding: 0.65rem var(--space-md);
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: 1.5rem;
   color: var(--color-text);
   font-size: var(--font-size-base);
+  font-family: inherit;
+  line-height: 1.5;
   outline: none;
+  resize: none;
+  overflow-y: auto;
 }
 
 .chatInput:focus {
@@ -447,6 +474,14 @@ body {
   align-items: center;
   gap: 0.3rem;
   padding: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+
+.typing-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  width: 100%;
+  margin-top: 0.15rem;
 }
 
 .typing-dot {
@@ -476,7 +511,7 @@ body {
   bottom: var(--space-sm);
   right: var(--space-md);
   height: 24px;
-  background: #020617cc;
+  background: var(--color-route-bar-bg);
   border: 1px solid var(--color-border);
   border-radius: 0.4rem;
   display: flex;
@@ -559,7 +594,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #020617;
+    background: var(--color-outer-bg);
   }
 
   .app {

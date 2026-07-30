@@ -41,9 +41,24 @@ export function renderChat() {
   form.replaceWith(newForm);
 
   const debouncedSubmit = debounce(handleSubmit, 300);
+
   newForm.addEventListener('submit', (e) => {
     e.preventDefault();
     debouncedSubmit(e);
+  });
+
+  const textarea = newForm.querySelector('.chatInput');
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      debouncedSubmit(e);
+    }
+  });
+
+  textarea.addEventListener('input', () => {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
   });
 }
 
@@ -59,11 +74,13 @@ async function handleSubmit(e) {
   if (!text) return;
 
   input.value = '';
+  input.style.height = 'auto';
   sendBtn.disabled = true;
 
   const systemPrompt = createSystemPrompt(character);
   const newHistory = appendUserMessage(history, text);
-  const uiMessages = [...messages, { role: 'user', content: text }];
+  const now = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  const uiMessages = [...messages, { role: 'user', content: text, time: now }];
 
   setState({ status: 'loading', messages: uiMessages, history: newHistory });
   renderMessages();
@@ -72,7 +89,8 @@ async function handleSubmit(e) {
     const raw = await callAI(newHistory, systemPrompt);
     const responseText = normalizeAIResponse(raw);
     const updatedHistory = appendAssistantMessage(newHistory, responseText);
-    const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
+    const replyTime = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    const updatedMessages = [...uiMessages, { role: 'character', content: responseText, time: replyTime }];
     const { characterHistories } = getState();
     setState({
       status: 'success',
@@ -95,7 +113,8 @@ async function handleSubmit(e) {
         const raw = await callAI(newHistory, systemPrompt);
         const responseText = normalizeAIResponse(raw);
         const updatedHistory = appendAssistantMessage(newHistory, responseText);
-        const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
+        const replyTime = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+        const updatedMessages = [...uiMessages, { role: 'character', content: responseText, time: replyTime }];
         const { characterHistories } = getState();
         setState({
           status: 'success',
@@ -127,16 +146,23 @@ async function callAI(history, systemPrompt) {
 }
 
 function renderMessages() {
-  const { status, messages, error } = getState();
+  const { status, messages, error, character } = getState();
   const container = document.querySelector('.chatMessages');
+
+  const statusEl = document.querySelector('.chatHeader__status');
+  if (statusEl) {
+    statusEl.textContent = status === 'loading'
+      ? `${character?.name ?? ''} está escribiendo...`
+      : 'En línea';
+  }
 
   if (status === 'idle' && messages.length === 0) {
     container.innerHTML = `
       <div class="state state--empty">
         <div class="stateContent">
           <p class="stateEmoji">💬</p>
-          <h2>¡Iniciá la conversación!</h2>
-          <p>Escribí un mensaje para comenzar.</p>
+          <h2>¡Inicia la conversación!</h2>
+          <p>Escribe un mensaje para comenzar.</p>
         </div>
       </div>
     `;
@@ -145,15 +171,19 @@ function renderMessages() {
 
   const messagesHTML = messages.map(msg => `
     <div class="message message--${msg.role === 'user' ? 'user' : 'character'}">
-      ${msg.content}
+      <span class="message__content">${msg.content}</span>
+      ${msg.time ? `<span class="message__time">${msg.time}</span>` : ''}
     </div>
   `).join('');
+
+  const charName = character?.name ?? '';
 
   const loadingHTML = status === 'loading' ? `
     <div class="message message--character message--loading">
       <span class="typing-dot"></span>
       <span class="typing-dot"></span>
       <span class="typing-dot"></span>
+      <span class="typing-label">${charName} está escribiendo...</span>
     </div>
   ` : '';
 
