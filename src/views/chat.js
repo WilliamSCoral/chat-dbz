@@ -39,6 +39,7 @@ export function renderChat() {
   const form = document.querySelector('.chatComposer');
   const newForm = form.cloneNode(true);
   form.replaceWith(newForm);
+
   const debouncedSubmit = debounce(handleSubmit, 300);
   newForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -72,7 +73,6 @@ async function handleSubmit(e) {
     const responseText = normalizeAIResponse(raw);
     const updatedHistory = appendAssistantMessage(newHistory, responseText);
     const updatedMessages = [...uiMessages, { role: 'character', content: responseText }];
-
     const { characterHistories } = getState();
     setState({
       status: 'success',

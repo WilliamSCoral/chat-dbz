@@ -2,7 +2,6 @@ import { fetchJson } from '../api.js';
 import { toCharacterProfile } from '../transform/character.js';
 
 const DBZ_API = 'https://dragonball-api.com/api';
-
 const SELECTED = ['Goku', 'Vegeta', 'Gohan', 'Freezer', 'Bulma', 'Majin'];
 
 function buildCharactersUrl({ limit = 58 } = {}) {

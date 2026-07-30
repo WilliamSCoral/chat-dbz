@@ -48,10 +48,8 @@ function getRandomResponse(name) {
 
 export async function mockFetch(payload) {
   await new Promise(resolve => setTimeout(resolve, 1200));
-
   const name = getCharacterName(payload.system);
   const text = getRandomResponse(name);
-
   return {
     content: [{ type: 'text', text }],
     usage: { input_tokens: 80, output_tokens: 40 },

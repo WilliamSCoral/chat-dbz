@@ -3,13 +3,8 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const { message, systemPrompt, history = [] } = req.body;
@@ -20,7 +15,6 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      console.error('OPENROUTER_API_KEY no está definida.');
       return res.status(500).json({ error: 'Error de configuración del servidor.' });
     }
 
@@ -53,7 +47,6 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
-      console.error('Error OpenRouter:', errData);
       return res.status(response.status).json({
         error: errData?.error?.message ?? 'Error al comunicarse con la IA.',
       });
@@ -62,14 +55,11 @@ export default async function handler(req, res) {
     const data = await response.json();
     const reply = data?.choices?.[0]?.message?.content;
 
-    if (!reply) {
-      return res.status(500).json({ error: 'No se recibió respuesta válida.' });
-    }
+    if (!reply) return res.status(500).json({ error: 'No se recibió respuesta válida.' });
 
     return res.status(200).json({ reply: reply.trim() });
 
   } catch (error) {
-    console.error('Error interno:', error);
     return res.status(500).json({ error: 'Error interno del servidor.' });
   }
 }

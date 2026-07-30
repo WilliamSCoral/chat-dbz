@@ -60,9 +60,9 @@ export function buildPayload(messages, systemPrompt) {
 
 export function normalizeAIResponse(raw) {
   const blocks = Array.isArray(raw?.content) ? raw.content : [];
-  const text = blocks
+  return blocks
     .filter(b => b && b.type === 'text' && typeof b.text === 'string')
     .map(b => b.text)
-    .join('');
-  return text.trim();
+    .join('')
+    .trim();
 }

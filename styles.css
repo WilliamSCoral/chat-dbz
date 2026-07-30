@@ -26,6 +26,17 @@
   --header-height:    64px;
 }
 
+/* ── TEMA CLARO ── */
+/* Cuando el <html> tiene data-theme="light", estas variables sobreescriben las del :root */
+[data-theme="light"] {
+  --color-bg:         #f8fafc;
+  --color-surface:    #ffffff;
+  --color-border:     #e2e8f0;
+  --color-text:       #0f172a;
+  --color-text-muted: #64748b;
+  --color-char-msg:   #f1f5f9;
+}
+
 body {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: var(--font-size-base);
@@ -67,6 +78,30 @@ body {
 
 .navbar__link:hover,
 .navbar__link.active {
+  color: var(--color-primary);
+}
+
+/* Botón toggle de tema. position: absolute a la derecha del navbar */
+.navbar {
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  right: var(--space-md);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.2rem 0.5rem;
+  line-height: 1;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
