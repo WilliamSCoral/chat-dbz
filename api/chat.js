@@ -6,6 +6,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  const GEMINI_MODEL = 'gemini-3.1-flash';
+
   try {
     const { message, systemPrompt, history = [] } = req.body;
 
@@ -18,7 +20,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Error de configuración del servidor.' });
     }
 
-    // Gemini usa roles "user" y "model" (no "assistant")
     const contents = [
       ...history
         .filter(msg => msg.role && msg.content)
@@ -30,7 +31,7 @@ export default async function handler(req, res) {
     ];
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
