@@ -1,3 +1,7 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -5,8 +9,6 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const GEMINI_MODEL = 'gemini-3.1-flash';
 
   try {
     const { message, systemPrompt, history = [] } = req.body;
@@ -20,47 +22,35 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Error de configuración del servidor.' });
     }
 
-    const contents = [
-      ...history
-        .filter(msg => msg.role && msg.content)
-        .map(msg => ({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }],
-        })),
-      { role: 'user', parts: [{ text: message }] },
-    ];
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: GEMINI_MODEL,
+      systemInstruction: systemPrompt,
+    });
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents,
-          generationConfig: {
-            maxOutputTokens: 200,
-            temperature: 0.85,
-          },
-        }),
-      }
-    );
+    const chatHistory = history
+      .filter(msg => msg.role && msg.content)
+      .map(msg => ({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }],
+      }));
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      return res.status(response.status).json({
-        error: errData?.error?.message ?? 'Error al comunicarse con la IA.',
-      });
-    }
+    const chat = model.startChat({
+      history: chatHistory,
+      generationConfig: {
+        maxOutputTokens: 200,
+        temperature: 0.85,
+      },
+    });
 
-    const data = await response.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const result = await chat.sendMessage(message);
+    const reply = result.response.text();
 
     if (!reply) return res.status(500).json({ error: 'No se recibió respuesta válida.' });
 
     return res.status(200).json({ reply: reply.trim() });
 
   } catch (error) {
-    return res.status(500).json({ error: 'Error interno del servidor.' });
+    return res.status(500).json({ error: error.message ?? 'Error interno del servidor.' });
   }
 }

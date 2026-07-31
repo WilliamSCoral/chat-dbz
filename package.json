@@ -10,5 +10,7 @@
   "devDependencies": {
     "vitest": "^2.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0"
+  }
 }
