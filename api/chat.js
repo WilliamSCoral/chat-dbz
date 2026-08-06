@@ -1,6 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+const OPENROUTER_MODEL = 'google/gemini-3.1-flash-lite';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -17,40 +15,54 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'El campo message es requerido.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: 'Error de configuración del servidor.' });
+      return res.status(500).json({ error: 'OPENROUTER_API_KEY no configurada en el servidor.' });
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: GEMINI_MODEL,
-      systemInstruction: systemPrompt,
-    });
 
     const chatHistory = history
       .filter(msg => msg.role && msg.content)
       .map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }],
+        role: msg.role === 'assistant' ? 'assistant' : 'user',
+        content: msg.content,
       }));
 
-    const chat = model.startChat({
-      history: chatHistory,
-      generationConfig: {
-        maxOutputTokens: 200,
-        temperature: 0.85,
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://proyectom3-williamcoral.vercel.app',
+        'X-Title': 'ProyectoM3 WilliamCoral',
       },
+      body: JSON.stringify({
+        model: OPENROUTER_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...chatHistory,
+          { role: 'user', content: message },
+        ],
+        max_tokens: 200,
+        temperature: 0.85,
+      }),
     });
 
-    const result = await chat.sendMessage(message);
-    const reply = result.response.text();
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      return res.status(response.status).json({
+        error: errData?.error?.message ?? 'Error al comunicarse con la IA.',
+      });
+    }
+
+    const data = await response.json();
+    const reply = data?.choices?.[0]?.message?.content;
 
     if (!reply) return res.status(500).json({ error: 'No se recibió respuesta válida.' });
 
     return res.status(200).json({ reply: reply.trim() });
 
   } catch (error) {
+    console.error('[chat.js error]', error);
     return res.status(500).json({ error: error.message ?? 'Error interno del servidor.' });
   }
 }
