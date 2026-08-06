@@ -254,52 +254,53 @@ para que quedara solo con `fetchJson()`, sin imports innecesarios.
 
 ---
 
-## Migración de servidor de IA y errores encontrados
+## Prompt 5 — Migración de Google AI Studio a OpenRouter
 
-Durante el desarrollo se intentó migrar desde OpenRouter hacia Google AI Studio (Gemini API directa) y luego se revirtió la decisión. A continuación el registro de lo ocurrido.
+**Problema detectado:** La conexión con Google AI Studio (Gemini API directa) no funcionaba. Se probaron múltiples modelos y configuraciones sin éxito, generando errores 429 y 503 en producción y en local.
 
-### Intento 1 — Google AI Studio con fetch manual
-
-Se reemplazó el endpoint de OpenRouter por la API directa de Gemini:
-
+**Prompt enviado:**
 ```
-https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}
-```
+Contexto:
+SPA DBZ con Vercel Serverless Function en api/chat.js. Estábamos usando OpenRouter
+como proxy para la IA y funcionaba. Se intentó migrar a Google AI Studio directamente
+pero ninguna configuración logró conexión estable.
 
-**Errores encontrados:**
+Objetivo:
+Volver a conectar con OpenRouter usando el modelo google/gemini-3.1-flash-lite,
+que el docente confirmó como funcional. Limpiar cualquier dependencia del SDK
+de Google que se instaló durante los intentos fallidos.
 
-- `gemini-3.1-flash` no existe como nombre de modelo — el correcto es `gemini-3.1-flash-lite`.
-- `gemini-3.6-flash` retornó 503 (alta demanda) al momento de la prueba.
-- La cuenta de Google AI Studio tenía créditos prepagos agotados, lo que devolvía 429 con el mensaje: _"Your prepayment credits are depleted"_.
-- Al crear una nueva API key sin billing, el tier gratuito retornó `limit: 0` porque el proyecto ya tenía billing habilitado previamente — eso desactiva las cuotas gratuitas.
+Restricciones:
+- Sin SDK externo, usar fetch nativo
+- OPENROUTER_API_KEY como variable de entorno
+- Mantener el mismo formato de respuesta { reply } que espera el frontend
+- Sin comentarios en el código
 
-### Intento 2 — Google AI Studio con SDK oficial
+Evidencia:
+Errores recibidos durante la migración:
+- gemini-3.1-flash → modelo inexistente
+- gemini-3.6-flash → 503 alta demanda
+- gemini-3.5-flash → 503 alta demanda
+- gemini-2.0-flash → 429 limit: 0 (tier gratuito desactivado por billing previo)
+- SDK @google/genai → mismos errores de cuota
 
-Se intentó usar el SDK `@google/genai` para evitar los errores de formato manual:
+Formato de salida:
+api/chat.js actualizado con OpenRouter, package.json sin @google/genai.
 
-```js
-import { GoogleGenAI } from '@google/genai';
-const ai = new GoogleGenAI({ apiKey });
-const chat = ai.chats.create({ model: 'gemini-3.5-flash', ... });
-```
-
-**Errores encontrados:**
-
-- `gemini-3.5-flash` retornó 503 (alta demanda).
-- `gemini-2.0-flash` retornó 429 con `limit: 0` en el tier gratuito por el mismo motivo anterior.
-
-### Decisión final — Vuelta a OpenRouter
-
-Se revirtió la migración y se volvió a OpenRouter, que ya funcionaba previamente. El modelo correcto en OpenRouter es `google/gemini-3.1-flash-lite` (no `google/gemini-2.0-flash-001` ni `google/gemini-2.0-flash-lite-001`, que no existen en esa plataforma).
-
-**Configuración final:**
-
-```js
-const OPENROUTER_MODEL = 'google/gemini-3.1-flash-lite';
-// Endpoint: https://openrouter.ai/api/v1/chat/completions
-// Header: Authorization: Bearer {OPENROUTER_API_KEY}
+Criterios de éxito:
+- Chat responde en local con vercel dev
+- No aparece OPENROUTER_API_KEY en el frontend
+- Variable de entorno configurada en Vercel dashboard
 ```
 
-La variable de entorno cambió de `GEMINI_API_KEY` a `OPENROUTER_API_KEY` tanto en `.env.local` como en Vercel (Settings → Environment Variables).
+**Respuesta recibida:** La IA identificó que los errores de Google AI Studio se debían a créditos prepagos agotados y billing habilitado que bloqueaba el tier gratuito. Generó `api/chat.js` con el endpoint de OpenRouter, header `Authorization: Bearer`, y el modelo `google/gemini-3.1-flash-lite`. También actualizó `package.json` eliminando `@google/genai`.
 
-**Aprendizaje:** Antes de migrar de proveedor de IA conviene verificar el estado de la cuenta (créditos, tier, billing) y confirmar los nombres exactos de modelos en la documentación oficial de cada plataforma.
+**Qué apliqué:** El archivo `api/chat.js` completo. Configuré `OPENROUTER_API_KEY` en `.env.local` y en Vercel → Settings → Environment Variables. Corrí `npm install` para limpiar el `node_modules`.
+
+**Verificación:** Corrí `vercel dev`, envié un mensaje y el chat respondió correctamente. Luego hice push y confirmé que el deploy en Vercel también funcionaba.
+
+**Errores que encontré yo durante el proceso:**
+- Pegué la key de OpenRouter en el campo `GEMINI_API_KEY` del `.env.local` en vez de crear `OPENROUTER_API_KEY` — el servidor respondía con "GEMINI_API_KEY no configurada".
+- El nombre del repo cambió de `chat-dbz` a `ProyectoM3_WilliamCoral` — tuve que actualizar el remote con `git remote set-url origin` y reconectar el proyecto en Vercel → Settings → Git.
+
+**Aprendizaje:** Antes de migrar de proveedor de IA conviene verificar el estado de la cuenta (créditos, billing) y confirmar los nombres exactos de modelos en la documentación oficial de cada plataforma.
