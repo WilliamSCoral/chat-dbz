@@ -1,4 +1,4 @@
-# Chat DBZ — Dragon Ball Z AI Chat
+# ProyectoM3 WilliamCoral — Dragon Ball Z AI Chat
 
 Single Page Application que permite chatear con personajes de Dragon Ball Z usando inteligencia artificial. Proyecto Integrador M3 — Henry Bootcamp.
 
@@ -6,9 +6,9 @@ Single Page Application que permite chatear con personajes de Dragon Ball Z usan
 
 ---
 
-## Personajes disponibles
+## Descripción del personaje
 
-La app incluye una galería con 6 personajes, cada uno con su propia personalidad definida en el system prompt:
+La app incluye una galería con 6 personajes de Dragon Ball Z, cada uno con personalidad propia definida en su system prompt:
 
 - **Goku** — amigable, entusiasta, siempre listo para pelear
 - **Vegeta** — arrogante, orgulloso, nunca muestra debilidad
@@ -32,8 +32,8 @@ La app incluye una galería con 6 personajes, cada uno con su propia personalida
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/TU_USUARIO/chat-dbz.git
-cd chat-dbz
+git clone https://github.com/WilliamSCoral/ProyectoM3_WilliamCoral.git
+cd ProyectoM3_WilliamCoral
 ```
 
 ### 2. Instalar dependencias
@@ -47,10 +47,10 @@ npm install
 Copiá el archivo de ejemplo y completá tu API key:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Editá `.env` y reemplazá el valor:
+Editá `.env.local` y reemplazá el valor:
 
 ```
 OPENROUTER_API_KEY=tu_api_key_real_de_openrouter
@@ -74,7 +74,7 @@ Abrí http://localhost:3000 en el navegador.
 npm test
 ```
 
-El proyecto incluye 37 tests unitarios con Vitest distribuidos en 4 archivos:
+El proyecto incluye tests unitarios con Vitest distribuidos en 4 archivos:
 
 - `tests/utils.test.js` — manejo de errores (getUserMessage)
 - `tests/character.test.js` — transformación de datos de la API (toCharacterProfile)
@@ -97,7 +97,7 @@ git push origin main
 
 - Entrá a [vercel.com](https://vercel.com) e iniciá sesión con GitHub
 - Clic en **Add New → Project**
-- Seleccioná el repositorio `chat-dbz`
+- Seleccioná el repositorio `ProyectoM3_WilliamCoral`
 - En **Environment Variables**, agregá `OPENROUTER_API_KEY` con tu API key
 - Clic en **Deploy**
 
@@ -110,16 +110,18 @@ Si ya deployaste sin la variable, entrá a **Settings → Environment Variables*
 ## Estructura del proyecto
 
 ```
-chat-dbz/
+ProyectoM3_WilliamCoral/
 ├── api/
-│   └── chat.js              # Serverless function — proxy seguro a OpenRouter
+│   ├── chat.js              # Serverless function — proxy seguro a OpenRouter
+│   └── chat_ejemplo.js      # Ejemplo alternativo con OpenRouter (referencia)
 ├── src/
 │   ├── main.js              # Punto de entrada
 │   ├── router.js            # Routing SPA con History API
 │   ├── state.js             # Estado global de la app
 │   ├── utils.js             # Funciones utilitarias
 │   ├── navigation.js        # Navegación y navbar
-│   ├── api.js               # fetchJson genérico
+│   ├── api.js               # fetchJson genérico con timeout
+│   ├── theme.js             # Toggle modo oscuro/claro
 │   ├── transform/
 │   │   └── character.js     # Transforma datos crudos de la API al ViewModel
 │   ├── services/
@@ -150,11 +152,19 @@ chat-dbz/
 
 ---
 
-## Uso de IA en el proyecto
+## Registro de uso de IA
 
 El uso de inteligencia artificial durante el desarrollo está documentado en [`AI_PROMPTING_LOG.md`](./AI_PROMPTING_LOG.md).
 
-Se utilizó IA como herramienta de apoyo para: bases de código, corrección de errores, y consultas técnicas puntuales. Todas las decisiones de arquitectura y lógica fueron tomadas y comprendidas por el desarrollador.
+Se utilizó IA (Claude — Anthropic) como herramienta de apoyo para:
+
+- Generación de la estructura base del proyecto y configuración inicial
+- Corrección de errores y debugging (doble declaración de variables, CSS anidado incorrectamente, nombres de modelos inválidos)
+- Implementación de features: modo oscuro/claro, timestamps, textarea con Shift+Enter, typing indicator
+- Migración entre APIs (OpenRouter → Google AI Studio → OpenRouter)
+- Consultas técnicas sobre formato de la Gemini API, roles de mensajes, y estructura de serverless functions en Vercel
+
+Todas las decisiones de arquitectura, elección del personaje, diseño del system prompt y lógica de negocio fueron tomadas y comprendidas por el desarrollador.
 
 ---
 
@@ -164,5 +174,5 @@ Se utilizó IA como herramienta de apoyo para: bases de código, corrección de 
 - History API para routing SPA
 - Fetch API con async/await
 - Vercel Serverless Functions
-- OpenRouter (proxy para modelos de IA)
+- OpenRouter (proxy para modelos de IA — `google/gemini-3.1-flash-lite`)
 - Vitest para tests unitarios
