@@ -3,6 +3,7 @@ import { getState, setState } from '../state.js';
 import { createSystemPrompt, buildPayload, normalizeAIResponse } from '../services/aiService.js';
 import { appendUserMessage, appendAssistantMessage, getTrimmedHistory, resetHistory } from '../chat/history.js';
 import { apiFetch } from '../chat/apiFetch.js';
+import { saveHistory, loadHistory, clearHistory, hasHistory } from '../chat/localStorage.js';
 
 function debounce(fn, delay) {
   let timer = null;
@@ -14,6 +15,14 @@ function debounce(fn, delay) {
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function updateHistoryIndicator(characterId) {
+  const badge = document.getElementById('chat-history-badge');
+  const clearBtn = document.getElementById('chat-clear-btn');
+  const visible = hasHistory(characterId);
+  if (badge) badge.hidden = !visible;
+  if (clearBtn) clearBtn.hidden = !visible;
 }
 
 export function renderChat() {
@@ -29,12 +38,42 @@ export function renderChat() {
   }
 
   const { characterHistories } = getState();
-  const saved = character && characterHistories[character.id];
-  const restoredMessages = saved ? saved.messages : [];
-  const restoredHistory = saved ? saved.history : resetHistory();
+  const inMemory = character && characterHistories[character.id];
+
+  let restoredMessages = [];
+  let restoredHistory = resetHistory();
+
+  if (inMemory) {
+    restoredMessages = inMemory.messages;
+    restoredHistory = inMemory.history;
+  } else if (character) {
+    const stored = loadHistory(character.id);
+    if (stored) {
+      restoredMessages = stored.messages;
+      restoredHistory = stored.history;
+    }
+  }
 
   setState({ status: 'idle', messages: restoredMessages, history: restoredHistory, character, error: null });
   renderMessages();
+
+  if (character) updateHistoryIndicator(character.id);
+
+  const clearBtn = document.getElementById('chat-clear-btn');
+  if (clearBtn) {
+    const newClearBtn = clearBtn.cloneNode(true);
+    clearBtn.replaceWith(newClearBtn);
+    newClearBtn.addEventListener('click', () => {
+      if (!character) return;
+      clearHistory(character.id);
+      const { characterHistories: ch } = getState();
+      const updated = { ...ch };
+      delete updated[character.id];
+      setState({ status: 'idle', messages: [], history: resetHistory(), characterHistories: updated, error: null });
+      updateHistoryIndicator(character.id);
+      renderMessages();
+    });
+  }
 
   const form = document.querySelector('.chatComposer');
   const newForm = form.cloneNode(true);
@@ -102,6 +141,9 @@ async function handleSubmit(e) {
       },
     });
 
+    saveHistory(character.id, updatedMessages, updatedHistory);
+    updateHistoryIndicator(character.id);
+
   } catch (error) {
     if (error.status === 429) {
       const seconds = error.retryAfterSeconds ?? 5;
@@ -125,6 +167,10 @@ async function handleSubmit(e) {
             [character.id]: { messages: updatedMessages, history: updatedHistory },
           },
         });
+
+        saveHistory(character.id, updatedMessages, updatedHistory);
+        updateHistoryIndicator(character.id);
+
       } catch (retryError) {
         setState({ status: 'error', error: getUserMessage(retryError) });
       }
@@ -172,6 +218,7 @@ function renderMessages() {
   const messagesHTML = messages.map(msg => `
     <div class="message message--${msg.role === 'user' ? 'user' : 'character'}">
       <span class="message__content">${msg.content}</span>
+      ${msg.role !== 'user' ? `<button class="message__copy" aria-label="Copiar respuesta" title="Copiar">📋</button>` : ''}
       ${msg.time ? `<span class="message__time">${msg.time}</span>` : ''}
     </div>
   `).join('');
@@ -198,4 +245,14 @@ function renderMessages() {
 
   container.innerHTML = messagesHTML + loadingHTML + errorHTML;
   container.scrollTop = container.scrollHeight;
+
+  container.querySelectorAll('.message__copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.closest('.message').querySelector('.message__content').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✅';
+        setTimeout(() => { btn.textContent = '📋'; }, 1500);
+      });
+    });
+  });
 }

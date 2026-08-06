@@ -19,8 +19,8 @@
 
     <div id="view-home" class="view">
       <div class="home">
-        <h1 class="home__title">DBZ Chat</h1>
-        <p class="home__subtitle">Elige tu personaje y comienza a chatear</p>
+        <h1 class="home__title">Chatea con los personajes de Dragon Ball Z</h1>
+        <p class="home__subtitle">Elige un personaje y mantén una conversación real con él gracias a inteligencia artificial. Cada uno habla, piensa y reacciona a su manera.</p>
         <div class="characters">
           <div class="character-card">
             <img class="character-card__avatar" src="https://dragonball-api.com/characters/goku_normal.webp" alt="Goku" />
@@ -47,6 +47,10 @@
             <p class="chatHeader__status">En línea</p>
           </div>
         </div>
+        <div class="chatHeader__actions">
+          <span class="chatHistory__badge" id="chat-history-badge" hidden>💾 guardado</span>
+          <button class="chatClear" id="chat-clear-btn" aria-label="Limpiar historial" title="Limpiar historial" hidden>🗑️</button>
+        </div>
       </header>
       <main class="chatMessages" aria-label="Mensajes del chat">
         <div class="state state--empty">
@@ -66,7 +70,97 @@
     <div id="view-about" class="view">
       <div class="about">
         <h1 class="about__title">Acerca del proyecto</h1>
-        <p class="about__text">DBZ Chat es una Single Page Application donde puedes chatear con personajes del universo Dragon Ball Z.</p>
+
+        <section class="about__section">
+          <h2 class="about__subtitle">¿Qué es DBZ Chat?</h2>
+          <p class="about__text">DBZ Chat es una Single Page Application donde podés chatear con personajes del universo Dragon Ball Z usando inteligencia artificial. Cada personaje tiene su propia personalidad, forma de hablar y reacciones únicas — todo definido a través de un system prompt que guía a la IA para mantenerse en el rol.</p>
+        </section>
+
+        <section class="about__section">
+          <h2 class="about__subtitle">¿Cómo funciona?</h2>
+          <p class="about__text">Elegís un personaje en la galería, escribís un mensaje y la app lo envía a una función serverless en Vercel que actúa como intermediario. Esa función llama a la IA con el historial completo de la conversación y el system prompt del personaje, y devuelve la respuesta. La API key nunca queda expuesta en el frontend.</p>
+          <ul class="about__list">
+            <li>Navegación SPA sin recargas usando History API</li>
+            <li>Historial de conversación mantenido durante la sesión</li>
+            <li>API key protegida mediante Vercel Serverless Functions</li>
+            <li>Modo oscuro y claro con persistencia en localStorage</li>
+            <li>Diseño responsive: mobile, tablet y desktop</li>
+          </ul>
+        </section>
+
+        <section class="about__section">
+          <h2 class="about__subtitle">Los personajes</h2>
+          <div class="about__characters">
+
+            <div class="about__character">
+              <div class="about__character-header">
+                <span class="about__character-emoji">🟠</span>
+                <h3 class="about__character-name">Goku</h3>
+              </div>
+              <p class="about__character-role">Guerrero Saiyan, el más poderoso de la Tierra</p>
+              <p class="about__character-desc">Amigable, entusiasta y directo. Siempre redirige la conversación hacia entrenamientos y peleas. Si no sabe algo, lo admite sin vergüenza.</p>
+            </div>
+
+            <div class="about__character">
+              <div class="about__character-header">
+                <span class="about__character-emoji">🔵</span>
+                <h3 class="about__character-name">Vegeta</h3>
+              </div>
+              <p class="about__character-role">Príncipe de los Saiyans, guerrero élite</p>
+              <p class="about__character-desc">Arrogante, orgulloso y tajante. Nunca muestra debilidad. Lo que no sabe simplemente no es digno de su atención.</p>
+            </div>
+
+            <div class="about__character">
+              <div class="about__character-header">
+                <span class="about__character-emoji">🟡</span>
+                <h3 class="about__character-name">Gohan</h3>
+              </div>
+              <p class="about__character-role">Hijo de Goku, mitad Saiyan y estudiante brillante</p>
+              <p class="about__character-desc">Educado, reflexivo e inteligente. Combina su lado guerrero con su amor por el estudio. Ante lo desconocido, propone investigar juntos.</p>
+            </div>
+
+            <div class="about__character">
+              <div class="about__character-header">
+                <span class="about__character-emoji">🟣</span>
+                <h3 class="about__character-name">Freezer</h3>
+              </div>
+              <p class="about__character-role">Señor del universo, el ser más poderoso de la galaxia</p>
+              <p class="about__character-desc">Frío, elegante y condescendiente con todos. Trata cualquier ignorancia como algo irrelevante para alguien de su nivel de poder.</p>
+            </div>
+
+            <div class="about__character">
+              <div class="about__character-header">
+                <span class="about__character-emoji">🔵</span>
+                <h3 class="about__character-name">Bulma</h3>
+              </div>
+              <p class="about__character-role">Científica genio e inventora de la cápsula dimensional</p>
+              <p class="about__character-desc">Inteligente, directa y con humor sarcástico. Resuelve cualquier problema con tecnología. Si no sabe algo, ya está pensando en cómo construir la solución.</p>
+            </div>
+
+            <div class="about__character">
+              <div class="about__character-header">
+                <span class="about__character-emoji">🩷</span>
+                <h3 class="about__character-name">Majin Buu</h3>
+              </div>
+              <p class="about__character-role">Ser mágico ancestral que ama los dulces y el juego</p>
+              <p class="about__character-desc">Infantil, inocente y espontáneo. No entiende muchas cosas del mundo pero compensa con entusiasmo. Ante lo confuso, pide que se lo expliquen más simple o cambia el tema a comida.</p>
+            </div>
+
+          </div>
+        </section>
+
+        <section class="about__section">
+          <h2 class="about__subtitle">Tecnologías</h2>
+          <ul class="about__list">
+            <li>HTML, CSS y JavaScript vanilla con ES Modules</li>
+            <li>History API para routing SPA sin frameworks</li>
+            <li>Vercel Serverless Functions como proxy de la IA</li>
+            <li>OpenRouter — modelo google/gemini-3.1-flash-lite</li>
+            <li>Vitest para tests unitarios</li>
+            <li>DragonBall API para imágenes y datos de personajes</li>
+          </ul>
+        </section>
+
       </div>
     </div>
 

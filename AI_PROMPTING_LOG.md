@@ -254,20 +254,52 @@ para que quedara solo con `fetchJson()`, sin imports innecesarios.
 
 ---
 
-## Estado actual del proyecto
+## Migración de servidor de IA y errores encontrados
 
-| Módulo | Implementado | Commit |
-|--------|-------------|--------|
-| L1 — Mobile First CSS | ✅ | `feat: estructura base HTML y CSS mobile-first (L1)` |
-| L2 — Router SPA | ✅ | `feat: router SPA con History API y navegación (L2)` |
-| L3 — Fetch API + estados UI | ✅ | `feat: Fetch API, estados loading/success/error y DragonBall API (L3)` |
-| L4-A — Transform + URLSearchParams | ✅ | `feat: capa transform con ViewModel y construcción de URL con URLSearchParams (L4-A)` |
-| L4-B — Services + casos borde | ✅ | `feat: separar capa de servicios, manejo de errores legibles y casos borde (L4-B)` |
-| L5 — AI Prompting Log | ✅ | este archivo |
-| L6 — pendiente | ⏳ | — |
-| L7 — pendiente | ⏳ | — |
-| L8 — pendiente | ⏳ | — |
+Durante el desarrollo se intentó migrar desde OpenRouter hacia Google AI Studio (Gemini API directa) y luego se revirtió la decisión. A continuación el registro de lo ocurrido.
 
----
+### Intento 1 — Google AI Studio con fetch manual
 
-*Este log se actualiza con cada módulo completado.*
+Se reemplazó el endpoint de OpenRouter por la API directa de Gemini:
+
+```
+https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}
+```
+
+**Errores encontrados:**
+
+- `gemini-3.1-flash` no existe como nombre de modelo — el correcto es `gemini-3.1-flash-lite`.
+- `gemini-3.6-flash` retornó 503 (alta demanda) al momento de la prueba.
+- La cuenta de Google AI Studio tenía créditos prepagos agotados, lo que devolvía 429 con el mensaje: _"Your prepayment credits are depleted"_.
+- Al crear una nueva API key sin billing, el tier gratuito retornó `limit: 0` porque el proyecto ya tenía billing habilitado previamente — eso desactiva las cuotas gratuitas.
+
+### Intento 2 — Google AI Studio con SDK oficial
+
+Se intentó usar el SDK `@google/genai` para evitar los errores de formato manual:
+
+```js
+import { GoogleGenAI } from '@google/genai';
+const ai = new GoogleGenAI({ apiKey });
+const chat = ai.chats.create({ model: 'gemini-3.5-flash', ... });
+```
+
+**Errores encontrados:**
+
+- `gemini-3.5-flash` retornó 503 (alta demanda).
+- `gemini-2.0-flash` retornó 429 con `limit: 0` en el tier gratuito por el mismo motivo anterior.
+
+### Decisión final — Vuelta a OpenRouter
+
+Se revirtió la migración y se volvió a OpenRouter, que ya funcionaba previamente. El modelo correcto en OpenRouter es `google/gemini-3.1-flash-lite` (no `google/gemini-2.0-flash-001` ni `google/gemini-2.0-flash-lite-001`, que no existen en esa plataforma).
+
+**Configuración final:**
+
+```js
+const OPENROUTER_MODEL = 'google/gemini-3.1-flash-lite';
+// Endpoint: https://openrouter.ai/api/v1/chat/completions
+// Header: Authorization: Bearer {OPENROUTER_API_KEY}
+```
+
+La variable de entorno cambió de `GEMINI_API_KEY` a `OPENROUTER_API_KEY` tanto en `.env.local` como en Vercel (Settings → Environment Variables).
+
+**Aprendizaje:** Antes de migrar de proveedor de IA conviene verificar el estado de la cuenta (créditos, tier, billing) y confirmar los nombres exactos de modelos en la documentación oficial de cada plataforma.
